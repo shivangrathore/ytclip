@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"text/tabwriter"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -14,12 +15,50 @@ import (
 	"github.com/shivangrathore/ytclip/internal/tui"
 )
 
-// Stamped by build.sh via -ldflags. "dev" when built with a plain
-// `go build`, which is the honest answer for an untagged local binary.
+// Stamped by the Makefile via -ldflags for release builds.
 var (
 	version = "dev"
 	commit  = "none"
 )
+
+// buildInfo fills in the version for binaries the Makefile did not
+// build. `go install github.com/...@v0.1.0` applies no ldflags, so
+// without this a properly versioned install reports "dev".
+//
+// Go embeds the module version and the VCS revision in the binary, so
+// both are recoverable at runtime.
+func buildInfo() (string, string) {
+	v, c := version, commit
+
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return v, c
+	}
+
+	// "(devel)" is what a local build reports; it is no better than
+	// the default, so leave the default in place.
+	if v == "dev" && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
+		v = bi.Main.Version
+	}
+
+	if c == "none" {
+		for _, s := range bi.Settings {
+			switch s.Key {
+			case "vcs.revision":
+				if len(s.Value) > 7 {
+					c = s.Value[:7]
+				} else if s.Value != "" {
+					c = s.Value
+				}
+			case "vcs.modified":
+				if s.Value == "true" && c != "none" {
+					c += "-dirty"
+				}
+			}
+		}
+	}
+	return v, c
+}
 
 func main() {
 	cfg := core.DefaultConfig()
@@ -51,8 +90,9 @@ func main() {
 	cfg.Padding = *padding
 
 	if *showVer {
+		v, c := buildInfo()
 		fmt.Printf("ytclip %s (%s) %s/%s %s\n",
-			version, commit, runtime.GOOS, runtime.GOARCH, runtime.Version())
+			v, c, runtime.GOOS, runtime.GOARCH, runtime.Version())
 		return
 	}
 	if *uninstall {
