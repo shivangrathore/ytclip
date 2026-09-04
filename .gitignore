@@ -1,0 +1,13 @@
+# build output
+/dist/
+/ytclip
+/ytclip.exe
+
+# runtime output
+/clips/
+
+# editors / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/

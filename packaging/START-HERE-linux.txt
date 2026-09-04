@@ -1,0 +1,78 @@
+ytclip - clip a section out of a YouTube video
+==============================================
+
+SETUP
+-----
+Make it executable and run it:
+
+    chmod +x ytclip
+    ./ytclip
+
+If it needs yt-dlp or ffmpeg, it will say so and offer to fetch them -
+press  i  and wait. It downloads them into ~/.cache/youtube-clip/bin,
+checks them against the projects' published SHA-256 sums, and carries
+on. No root, nothing installed system-wide, nothing added to PATH.
+
+If you would rather use your distro's packages, install them first and
+ytclip will use those instead:
+
+    sudo apt install ffmpeg     # or dnf / pacman / zypper
+    pipx install yt-dlp         # pipx keeps it current, which matters
+
+Check what it found:
+
+    ./ytclip --doctor
+
+That also prints which hardware encoder works on this machine - it
+runs a real one-frame encode per candidate rather than trusting the
+ffmpeg build's list.
+
+To remove what ytclip downloaded:
+
+    ./ytclip --uninstall
+
+To put it on PATH:
+
+    install -m755 ytclip ~/.local/bin/ytclip
+
+
+USING IT
+--------
+1. Paste the YouTube URL, press Enter
+2. Pick quality and format with the LEFT / RIGHT arrow keys
+3. Tab down to Start and End, type the times you want
+4. Tab to "Start clip", press Enter
+
+Keys:  Tab or Up/Down = move between fields
+       Left/Right     = change a setting
+       Enter          = next field, or start
+       Esc            = go back
+       l              = show the log while it is running
+       Ctrl+C         = cancel
+       q              = quit when it is done
+
+Times can be typed however you like. All of these work:
+
+    1:20:00        1:20          90
+    1h 20m         1 hr 20 minute
+    20 minutes     45 sec        1 hour and 20 minutes
+
+It shows you what it understood before it starts.
+
+Leave Start blank to begin at the start of the video.
+Leave End blank to run to the end.
+Leave both blank for the whole video.
+
+
+WHERE THE FILES GO
+------------------
+A "clips" folder, created in whatever directory you ran it from.
+Use --out to send them elsewhere.
+
+
+IF SOMETHING LOOKS WRONG
+------------------------
+It checks its own work and will stop and ask rather than hand you a
+bad file. If it says the clip came back short, or the quality fell
+through to something low, that is real - read what it says. The
+downloaded source is always kept, never thrown away.

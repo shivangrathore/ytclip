@@ -1,0 +1,87 @@
+ytclip - clip a section out of a YouTube video
+==============================================
+
+SETUP
+-----
+Open PowerShell in this folder and run:
+
+    .\ytclip.exe
+
+If it needs anything, it will say so and offer to fetch it - just
+press  i  and wait. It downloads yt-dlp and ffmpeg itself, checks
+them, and carries on. No admin rights, nothing installed system-wide,
+nothing added to PATH.
+
+That is the whole setup. About 160 MB, one time.
+
+To check things over first:
+
+    .\ytclip.exe --doctor
+
+That prints what it found and which encoder your graphics card gives
+it. To remove what it downloaded later:
+
+    .\ytclip.exe --uninstall
+
+
+USING IT
+--------
+1. Paste the YouTube URL, press Enter
+2. Pick quality and format with the LEFT / RIGHT arrow keys
+3. Tab down to Start and End, type the times you want
+4. Tab to "Start clip", press Enter
+
+Keys:  Tab or Up/Down = move between fields
+       Left/Right     = change a setting
+       Enter          = next field, or start
+       Esc            = go back
+       L              = show the log while it is running
+       Ctrl+C         = cancel
+       Q              = quit when it is done
+
+Times can be typed however you like. All of these work:
+
+    1:20:00
+    1:20
+    90
+    1h 20m
+    1 hr 20 minute
+    1 hour and 20 minutes
+    20 minutes
+    45 sec
+
+It shows you what it understood before it starts, so you can check.
+
+Leave Start blank to begin at the start of the video.
+Leave End blank to run to the end.
+Leave both blank for the whole video.
+
+
+WHERE THE FILES GO
+------------------
+A "clips" folder, created next to wherever you ran it from.
+The finished path is shown on screen when it is done.
+
+
+IF SOMETHING LOOKS WRONG
+------------------------
+It checks its own work and will stop and ask rather than hand you a
+bad file. If it says the clip came back short, or the quality fell
+through to something low, that is real - read what it says. The
+downloaded file is always kept, never thrown away.
+
+Picking "Best MP4" above 1080p will show a note: YouTube does not
+publish H.264 above 1080p. Use "Best Video + Audio" instead and let
+it convert.
+
+
+IF YOU PREFER TO INSTALL THE TOOLS YOURSELF
+-------------------------------------------
+You do not have to use the built-in downloader:
+
+    winget install yt-dlp.yt-dlp
+    winget install Gyan.FFmpeg
+
+Then close PowerShell and open a new one, so Windows picks up the
+change. ytclip uses whatever is already on the machine before it
+considers downloading anything.
