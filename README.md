@@ -225,4 +225,20 @@ Override with `make dist VERSION=1.2.0`.
 Adding a platform is one word in the `LINUX_TARGETS` or
 `WINDOWS_TARGETS` list at the top of the Makefile.
 
-`goreleaser release --clean` also works, once the repo has a remote.
+## Releasing
+
+Tag and push. GitHub Actions runs `make dist`, which runs the tests
+first, then publishes the archives and checksums to a GitHub release.
+
+```
+git tag -a v0.1.0 -m "v0.1.0"
+git push origin v0.1.0
+```
+
+The version in `ytclip --version` comes from `git describe`, so the tag
+is the single source of truth — there is no version constant to forget
+to bump.
+
+`.github/workflows/ci.yml` runs the same `make check` on every push and
+pull request, plus a cross-build of every target, so a release-time
+break shows up long before release time.

@@ -1,0 +1,76 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+# Needed to create the release and upload the archives to it.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The Makefile takes VERSION from `git describe`, which needs
+          # the tags. A shallow clone reports "dev" and would stamp the
+          # wrong version into every binary.
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      # `dist` depends on `check`, so a failing test or unformatted
+      # file blocks the release instead of shipping.
+      - name: Build every target
+        run: make -j dist
+
+      - name: Show what was built
+        run: |
+          ls -lh dist/
+          cat dist/checksums_*.txt
+
+      # Written as a file rather than piped inline, so the exact notes
+      # are visible in the run log when something looks wrong.
+      - name: Compose release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          cat > release-notes.md <<EOF
+          ## Install
+
+          Download the archive for your platform below, unpack it, and run
+          \`ytclip\`. Nothing else is needed — if yt-dlp or ffmpeg are missing
+          it offers to fetch them itself (press \`i\`).
+
+          | file | platform |
+          |---|---|
+          | \`*_windows_amd64.zip\` | Windows, Intel/AMD |
+          | \`*_windows_arm64.zip\` | Windows on ARM |
+          | \`*_linux_amd64.tar.gz\` | Linux, Intel/AMD |
+          | \`*_linux_arm64.tar.gz\` | Linux on ARM (Raspberry Pi, etc.) |
+
+          macOS: build from source with \`go install github.com/shivangrathore/ytclip@${TAG}\`.
+
+          Verify a download:
+
+          \`\`\`
+          sha256sum -c checksums_${TAG}.txt --ignore-missing
+          \`\`\`
+          EOF
+          cat release-notes.md
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --notes-file release-notes.md \
+            --generate-notes \
+            dist/*.zip dist/*.tar.gz dist/checksums_*.txt
